@@ -1,0 +1,2 @@
+set(__QT_DEPLOY_TARGET_PwCheckGUI_FILE /Users/khadimdiop/PasswordStrengthChecker/build/PwCheckGUI.app/Contents/MacOS/PwCheckGUI)
+set(__QT_DEPLOY_TARGET_PwCheckGUI_TYPE EXECUTABLE)

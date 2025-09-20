@@ -1,0 +1,4 @@
+# ninja log v7
+2	433	1758401374119389073	CMakeFiles/PwCheckGUI.dir/password_scoring.cpp.o	543f649629bd9bc5
+1	964	1758401374119016873	CMakeFiles/PwCheckGUI.dir/gui_main.cpp.o	22db7de864215551
+965	1076	1758401375082354683	PwCheckGUI.app/Contents/MacOS/PwCheckGUI	21376c9aadc4181b
