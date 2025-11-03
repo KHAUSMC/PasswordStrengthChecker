@@ -3,6 +3,8 @@
 #include <cctype>
 #include <unordered_map>
 
+
+//library in c++
 namespace pwcheck
 {
 
@@ -14,14 +16,17 @@ namespace pwcheck
         return t;
     }
 
+    //Checking to see if the characters is ASCII 
     static bool is_ascii_print(char c)
     {
+        //One of these must be true or else this will fail
         return c >= 32 && c <= 126;
     }
 
+
     static int char_class_count(const std::string &s)
     {
-        // setting boolean = for testing
+        // Here we're checking for whether it has the required character.
         bool has_lower = false;
         bool has_upper = false;
         bool has_digit = false;
@@ -30,7 +35,7 @@ namespace pwcheck
 
         for (unsigned char c : s)
         {
-            // checking to see if the it's lower
+            // Checking to see if it's lower
             if (std::islower(c))
                 has_lower = true;
             else if (std::isupper(c))
@@ -42,6 +47,7 @@ namespace pwcheck
             else if (is_ascii_print(c))
                 has_symbol = true;
         }
+        
         int n = 0;
         n += has_lower;
         n += has_upper;
