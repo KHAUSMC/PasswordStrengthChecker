@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Password Strength Checker</title>
+    <style>
+        :root {
+            --bg: #0b0f14;
+            --card: #111827;
+            --muted: #9ca3af;
+            --text: #e5e7eb;
+            --weak: #d9534f;
+            --fair: #f0ad4e;
+            --strong: #5bc0de;
+            --very-strong: #5cb85c;
+            --accent: #60a5fa;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            background: radial-gradient(1200px 600px at 70% -10%, #18212f 0%, var(--bg) 60%);
+            color: var(--text);
+        }
+
+        .wrap {
+            max-width: 680px;
+            margin: 6rem auto;
+            padding: 2rem;
+        }
+
+        .card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+            padding: 1.5rem;
+        }
+
+        h1 {
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            margin: 0 0 1rem;
+        }
+
+        p.subtitle {
+            color: var(--muted);
+            margin: 0 0 1.25rem;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: .75rem;
+            align-items: center;
+        }
+
+        .field {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: #0e1522;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .field input {
+            flex: 1;
+            border: 0;
+            outline: none;
+            background: transparent;
+            color: var(--text);
+            padding: 14px 14px;
+            font-size: 1rem;
+            letter-spacing: .2px;
+        }
+
+        .field button {
+            appearance: none;
+            border: 0;
+            cursor: pointer;
+            background: transparent;
+            color: var(--muted);
+            padding: 0 12px;
+            font-size: .95rem;
+        }
+
+        .field button:hover {
+            color: var(--text);
+        }
+
+        .bar {
+            height: 12px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .bar>div {
+            height: 100%;
+            width: 0%;
+            transition: width .25s ease, background .25s ease;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: .75rem;
+        }
+
+        .metric {
+            background: #0e1522;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: .6rem .75rem;
+            min-height: 56px;
+        }
+
+        .metric .label {
+            color: var(--muted);
+            font-size: .8rem;
+        }
+
+        .metric .value {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .reasons {
+            margin-top: 1rem;
+            padding: .75rem .9rem;
+            background: #0e1522;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+        }
+
+        .reasons b {
+            color: var(--muted);
+        }
+
+        .reasons ul {
+            margin: .5rem 0 0 1rem;
+            padding: 0;
+        }
+
+        .foot {
+            margin-top: 1rem;
+            color: var(--muted);
+            font-size: .85rem;
+        }
+
+        .foot code {
+            color: var(--text);
+            background: #0e1522;
+            padding: 2px 6px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="card">
+            <h1>🔐 Password Strength Checker</h1>
+            <p class="subtitle">Instant score, strength bucket, and improvement tips — all in your browser.</p>
+
+            <div class="row" style="margin-bottom: .8rem;">
+                <div class="field" style="grid-column: span 2;">
+                    <input id="pw" type="password" placeholder="Enter a password…" autocomplete="off" />
+                    <button id="toggle" title="Show / hide">👁️</button>
+                    <button id="clear" title="Clear">✕</button>
+                </div>
+            </div>
+
+            <div class="bar" aria-label="strength">
+                <div id="bar"></div>
+            </div>
+
+            <div class="metrics">
+                <div class="metric">
+                    <div class="label">Score</div>
+                    <div id="score" class="value">0</div>
+                </div>
+                <div class="metric">
+                    <div class="label">Bucket</div>
+                    <div id="bucket" class="value">–</div>
+                </div>
+                <div class="metric">
+                    <div class="label">Entropy (est.)</div>
+                    <div id="entropy" class="value">0.0 bits</div>
+                </div>
+            </div>
+
+            <div class="reasons">
+                <b>Reasons / Tips</b>
+                <ul id="reasons">
+                    <li>Start typing to see suggestions…</li>
+                </ul>
+            </div>
+
+            <div class="foot">
+                Fully client‑side. No passwords are sent anywhere.
+                Tip: Use a passphrase (4+ random words), mix **length + variety**, and avoid reused or common words.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Basic blocklist/dictionary samples (you can expand these) ---
+        const BLOCKLIST = new Set(["password", "123456", "123456789", "qwerty", "111111", "abc123", "iloveyou", "letmein", "monkey", "dragon"]);
+        const DICTIONARY = new Set(["cat", "dog", "tree", "love", "king", "queen", "hello", "world", "summer", "winter"]);
+
+        const pw = document.getElementById('pw');
+        const bar = document.getElementById('bar');
+        const scoreEl = document.getElementById('score');
+        const bucketEl = document.getElementById('bucket');
+        const entropyEl = document.getElementById('entropy');
+        const reasonsEl = document.getElementById('reasons');
+
+        document.getElementById('toggle').addEventListener('click', () => {
+            pw.type = pw.type === 'password' ? 'text' : 'password';
+            pw.focus();
+        });
+        document.getElementById('clear').addEventListener('click', () => {
+            pw.value = '';
+            compute('');
+            pw.focus();
+        });
+
+        pw.addEventListener('input', e => compute(e.target.value));
+
+        function compute(p) {
+            const detail = scorePassword(p);
+            // score and bucket
+            scoreEl.textContent = Math.round(detail.score);
+            bucketEl.textContent = detail.bucketLabel;
+            // progress bar
+            bar.style.width = Math.max(0, Math.min(100, detail.score)) + '%';
+            bar.style.background = bucketColor(detail.bucket);
+            // entropy
+            entropyEl.textContent = (detail.entropyBits).toFixed(1) + ' bits';
+            // reasons
+            reasonsEl.innerHTML = '';
+            if (detail.reasons.length === 0) {
+                reasonsEl.innerHTML = '<li>Looks good—no specific warnings.</li>';
+            } else {
+                for (const r of detail.reasons) {
+                    const li = document.createElement('li');
+                    li.textContent = r;
+                    reasonsEl.appendChild(li);
+                }
+            }
+        }
+
+        const Bucket = { Weak: 0, Fair: 1, Strong: 2, VeryStrong: 3 };
+        function bucketColor(b) {
+            switch (b) {
+                case Bucket.Weak: return getComputedStyle(document.documentElement).getPropertyValue('--weak');
+                case Bucket.Fair: return getComputedStyle(document.documentElement).getPropertyValue('--fair');
+                case Bucket.Strong: return getComputedStyle(document.documentElement).getPropertyValue('--strong');
+                case Bucket.VeryStrong: return getComputedStyle(document.documentElement).getPropertyValue('--very-strong');
+            }
+            return '#888';
+        }
+
+        function bucketLabel(b) {
+            return ['Weak', 'Fair', 'Strong', 'Very Strong'][b] || '–';
+        }
+
+        // --- Scoring model (client‑side port inspired by your C++ logic) ---
+        function scorePassword(pw) {
+            const reasons = [];
+            if (!pw) {
+                return {
+                    score: 0,
+                    bucket: Bucket.Weak,
+                    bucketLabel: bucketLabel(Bucket.Weak),
+                    entropyBits: 0,
+                    reasons: ["Type a password to evaluate strength."]
+                };
+            }
+
+            const len = pw.length;
+            const hasLower = /[a-z]/.test(pw);
+            const hasUpper = /[A-Z]/.test(pw);
+            const hasDigit = /\d/.test(pw);
+            const hasSymbol = /[^a-zA-Z0-9]/.test(pw);
+
+            // Base points from length
+            let score = Math.max(0, Math.min(40, (len - 6) * 4)); // 0..40
+            if (len < 8) reasons.push('Too short — aim for 12–16+ characters.');
+            else if (len < 12) reasons.push('Longer is stronger — 12–16+ is ideal.');
+
+            // Variety points
+            const varietyCount = [hasLower, hasUpper, hasDigit, hasSymbol].filter(Boolean).length;
+            score += varietyCount * 8; // up to +32
+            if (varietyCount <= 2) reasons.push('Add more character types (upper/lower/digit/symbol).');
+
+            // Repetition and simple patterns penalties
+            if (/(.)\1{2,}/.test(pw)) { score -= 8; reasons.push('Avoid repeated characters (e.g., "aaa").'); }
+            if (/1234|abcd|qwer|password|letmein|iloveyou/i.test(pw)) { score -= 15; reasons.push('Avoid common patterns or phrases.'); }
+
+            // Blocklist/dictionary checks (substring containment, case‑insensitive)
+            const lower = pw.toLowerCase();
+            for (const bad of BLOCKLIST) {
+                if (lower.includes(bad)) { score -= 25; reasons.push(`Includes a common password: "${bad}"`); break; }
+            }
+            for (const word of DICTIONARY) {
+                if (word.length >= 3 && lower.includes(word)) { score -= 8; reasons.push(`Contains dictionary word: "${word}"`); break; }
+            }
+
+            // Unique charset size estimate for entropy
+            let charset = 0;
+            if (hasLower) charset += 26;
+            if (hasUpper) charset += 26;
+            if (hasDigit) charset += 10;
+            if (hasSymbol) charset += 33; // rough printable symbols
+            const entropyBits = len > 0 && charset > 0 ? Math.log2(Math.pow(charset, len)) : 0;
+
+            // Clamp score 0..100 and bucketize
+            score = Math.max(0, Math.min(100, score));
+            let bucket = Bucket.Weak;
+            if (score >= 80) bucket = Bucket.VeryStrong;
+            else if (score >= 50) bucket = Bucket.Strong;
+            else if (score >= 25) bucket = Bucket.Fair;
+
+            // Positive guidance
+            if (bucket <= Bucket.Fair && len >= 12 && varietyCount >= 3) {
+                reasons.push('Good direction — consider a 4‑word passphrase for even stronger security.');
+            }
+
+            return {
+                score,
+                bucket,
+                bucketLabel: bucketLabel(bucket),
+                entropyBits,
+                reasons
+            };
+        }
+
+        // Initial state
+        compute('');
+    </script>
+</body>
+
+</html>
